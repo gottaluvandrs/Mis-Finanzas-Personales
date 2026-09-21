@@ -1,0 +1,2093 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mis Finanzas Quincenales</title>
+<meta name="description" content="Organiza tus ingresos, gastos, deudas y fondo de emergencia quincena a quincena.">
+<meta name="theme-color" content="#2f6fed">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mis Finanzas">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root {
+    box-sizing: border-box;
+    --bg: #f2f4f7;
+    --bg-card: #ffffff;
+    --text: #1c2230;
+    --text-muted: #6b7280;
+    --border: #e4e7ec;
+    --accent: #2f6fed;
+    --accent-soft: #e8f0ff;
+    --green: #16a34a;
+    --green-soft: #e7f8ee;
+    --red: #dc2626;
+    --red-soft: #fdecec;
+    --orange: #d97706;
+    --orange-soft: #fdf2e3;
+    --purple: #7c3aed;
+    --purple-soft: #f1eafd;
+    --shadow: 0 1px 3px rgba(20,20,43,0.08), 0 1px 2px rgba(20,20,43,0.06);
+    --radius: 14px;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1115;
+      --bg-card: #171a21;
+      --text: #edeef1;
+      --text-muted: #9aa1ac;
+      --border: #2a2e37;
+      --accent: #5b8def;
+      --accent-soft: #16233e;
+      --green: #34d399;
+      --green-soft: #113228;
+      --red: #f87171;
+      --red-soft: #3a1a1a;
+      --orange: #fbbf24;
+      --orange-soft: #3a2c0f;
+      --purple: #a78bfa;
+      --purple-soft: #2a1f45;
+      --shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1115;
+    --bg-card: #171a21;
+    --text: #edeef1;
+    --text-muted: #9aa1ac;
+    --border: #2a2e37;
+    --accent: #5b8def;
+    --accent-soft: #16233e;
+    --green: #34d399;
+    --green-soft: #113228;
+    --red: #f87171;
+    --red-soft: #3a1a1a;
+    --orange: #fbbf24;
+    --orange-soft: #3a2c0f;
+    --purple: #a78bfa;
+    --purple-soft: #2a1f45;
+    --shadow: 0 1px 3px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  header.app-header {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 20;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 16px calc(14px);
+    box-shadow: var(--shadow);
+  }
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .header-row h1 {
+    font-size: 18px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .theme-btn {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 7px 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  nav.tabs {
+    max-width: 980px;
+    margin: 10px auto 0;
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+  nav.tabs::-webkit-scrollbar { display: none; }
+  nav.tabs button {
+    flex: 0 0 auto;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-muted);
+    padding: 8px 13px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+  nav.tabs button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  main {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 16px;
+    padding-bottom: 60px;
+  }
+  .view { display: none; }
+  .view.active { display: block; animation: fade .18s ease; }
+  @keyframes fade { from { opacity: 0; transform: translateY(4px);} to {opacity:1; transform:none;} }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .card h2 { margin: 0 0 12px; font-size: 15.5px; }
+  .card h3 { margin: 0 0 8px; font-size: 14px; color: var(--text-muted); font-weight: 600; }
+  .row { display: flex; align-items: center; gap: 10px; }
+  .row.between { justify-content: space-between; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 560px) { .grid3 { grid-template-columns: 1fr 1fr; } }
+
+  .stat { padding: 12px; border-radius: 12px; background: var(--accent-soft); }
+  .stat .label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+  .stat .value { font-size: 19px; font-weight: 700; }
+  .stat.green { background: var(--green-soft); }
+  .stat.red { background: var(--red-soft); }
+  .stat.orange { background: var(--orange-soft); }
+  .stat.purple { background: var(--purple-soft); }
+
+  .qnav { display: flex; align-items: center; gap: 10px; justify-content: center; margin-bottom: 4px; }
+  .qnav button {
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    border-radius: 10px;
+    width: 42px; height: 42px;
+    cursor: pointer;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+  .qnav .label { font-weight: 700; font-size: 15px; min-width: 190px; text-align: center; }
+  .qnav .today { font-size: 12px; border-radius: 999px; padding: 4px 10px; width: auto; height: auto; color: var(--accent); border-color: var(--accent); }
+
+  input, select {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    min-height: 44px;
+  }
+  label { font-size: 12.5px; color: var(--text-muted); display: block; margin-bottom: 4px; }
+  .field { margin-bottom: 10px; }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    font-size: 15px;
+    min-height: 46px;
+    width: 100%;
+  }
+  button.ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    min-height: 44px;
+  }
+  button.danger { color: var(--red); }
+  .list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    gap: 8px;
+  }
+  .list-item:last-child { border-bottom: none; }
+  .li-main { display: flex; flex-direction: column; }
+  .li-main .t1 { font-weight: 600; font-size: 14px; }
+  .li-main .t2 { font-size: 12px; color: var(--text-muted); }
+  .amt { font-weight: 700; white-space: nowrap; }
+  .del-btn {
+    border: none; background: none; color: var(--text-muted);
+    cursor: pointer; font-size: 15px; padding: 4px 6px;
+  }
+  .del-btn:hover { color: var(--red); }
+  .empty { color: var(--text-muted); font-size: 13.5px; text-align: center; padding: 18px 0; }
+
+  .progress-track {
+    height: 9px; border-radius: 999px; background: var(--border); overflow: hidden; margin: 6px 0;
+  }
+  .progress-fill { height: 100%; border-radius: 999px; background: var(--accent); transition: width .3s; }
+  .cat-row { margin-bottom: 14px; }
+  .cat-row .row.between { margin-bottom: 4px; font-size: 13.5px; }
+  .cat-row .sub { font-size: 12px; color: var(--text-muted); }
+
+  .chip { display:inline-block; font-size:11px; font-weight:700; padding: 2px 8px; border-radius:999px; }
+  .chip.ok { background: var(--green-soft); color: var(--green); }
+  .chip.warn { background: var(--orange-soft); color: var(--orange); }
+  .chip.bad { background: var(--red-soft); color: var(--red); }
+
+  .charts-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 700px) { .charts-wrap { grid-template-columns: 1fr; } }
+
+  .donut-wrap { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  .donut { width: 168px; height: 168px; border-radius: 50%; position: relative; flex-shrink: 0; }
+  .donut-hole {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    width: 100px; height: 100px; border-radius: 50%; background: var(--bg-card);
+    display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  }
+  .donut-hole .amt { font-size: 14px; font-weight: 800; }
+  .donut-hole .lbl { font-size: 9.5px; color: var(--text-muted); margin-top: 2px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 7px 14px; justify-content: center; font-size: 12px; }
+  .legend .item { display: flex; align-items: center; gap: 6px; }
+  .legend .dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+
+  .balance-wrap { display: flex; flex-direction: column; justify-content: center; gap: 18px; height: 100%; padding: 6px 0; }
+  .balance-row .row.between { font-size: 13px; margin-bottom: 5px; }
+  .balance-track { height: 18px; border-radius: 9px; background: var(--border); overflow: hidden; }
+  .balance-fill { height: 100%; border-radius: 9px; transition: width .3s; }
+
+  .svg-chart-wrap { width: 100%; }
+  .svg-chart-wrap svg { width: 100%; height: auto; display: block; }
+
+  .rec-item { display:flex; gap:10px; padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13.5px; }
+  .rec-item:last-child { border-bottom:none; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--border); }
+  th { color: var(--text-muted); font-weight: 600; }
+  .scroll-x { overflow-x: auto; }
+
+  .pct-input-row { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .pct-input-row .swatch { width: 12px; height: 12px; border-radius: 4px; flex-shrink:0; }
+  .pct-input-row input { width: 70px; text-align:right; }
+  .pct-sum-banner { padding: 10px 12px; border-radius: 10px; font-size: 13.5px; font-weight: 600; margin-top: 6px; }
+
+  .semaforo-badge { font-size: 11.5px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .semaforo-badge.green { background: var(--green-soft); color: var(--green); }
+  .semaforo-badge.orange { background: var(--orange-soft); color: var(--orange); }
+  .semaforo-badge.red { background: var(--red-soft); color: var(--red); }
+  .semaforo-dot-big { width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0; box-shadow: inset 0 0 0 4px rgba(255,255,255,0.15); }
+  .semaforo-dot-big.green { background: var(--green); }
+  .semaforo-dot-big.orange { background: var(--orange); }
+  .semaforo-dot-big.red { background: var(--red); }
+  .estado-item { padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .estado-item:last-child { border-bottom: none; }
+
+  footer.app-footer {
+    text-align: center; font-size: 11.5px; color: var(--text-muted);
+    padding: 4px 20px calc(18px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: flex; align-items: flex-end; justify-content: center;
+    z-index: 100;
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal-box {
+    background: var(--bg-card); border-radius: 18px 18px 0 0;
+    padding: 20px 20px calc(20px + env(safe-area-inset-bottom, 0px));
+    max-width: 480px; width: 100%;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+  }
+  .modal-box h3 { margin: 0 0 12px; font-size: 16px; }
+  .modal-box ol { margin: 0 0 14px; padding-left: 20px; font-size: 14px; line-height: 1.6; }
+  .modal-box .close-btn { width: 100%; }
+
+  .plantilla-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; text-align: left;
+    border: 1px solid var(--border); background: var(--bg);
+    border-radius: 10px; padding: 11px 12px; margin-bottom: 8px;
+    cursor: pointer; color: var(--text); font-size: 13.5px;
+  }
+  .plantilla-btn:active { background: var(--accent-soft); }
+  .plantilla-btn .pl-info { display: flex; flex-direction: column; }
+  .plantilla-btn .pl-info .t2 { font-size: 11.5px; color: var(--text-muted); }
+  .plantilla-btn .pl-amt { font-weight: 700; white-space: nowrap; margin-left: 10px; }
+  .plantilla-del { background:none; border:none; color: var(--text-muted); font-size: 13px; cursor: pointer; padding: 2px 6px; }
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="header-row">
+    <h1>💰 Mis Finanzas</h1>
+    <div class="row" style="gap:6px;">
+      <button class="theme-btn" id="btnGuardarAhora" title="Guardar ahora">💾 Guardar</button>
+      <button class="theme-btn" id="themeToggle" title="Cambiar tema">🌓</button>
+    </div>
+  </div>
+  <div class="row" id="saveStatusRow" style="max-width:980px;margin:6px auto 0;justify-content:center;font-size:11px;color:var(--text-muted);"></div>
+  <nav class="tabs" id="tabs">
+    <button data-view="dashboard" class="active">📊 Resumen</button>
+    <button data-view="ingresos">💵 Ingresos</button>
+    <button data-view="gastos">🧾 Gastos</button>
+    <button data-view="deudas">💳 Deudas</button>
+    <button data-view="tarjetas">🪪 Tarjetas</button>
+    <button data-view="fondo">🛟 Fondo</button>
+    <button data-view="estado">🚦 Estado</button>
+    <button data-view="config">⚙️ Distribución</button>
+    <button data-view="historial">📈 Historial</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- DASHBOARD -->
+  <section class="view active" id="view-dashboard">
+    <div class="card">
+      <div class="qnav">
+        <button id="qPrev">‹</button>
+        <div class="label" id="qLabel">—</div>
+        <button id="qNext">›</button>
+      </div>
+      <div class="row" style="justify-content:center;">
+        <button class="ghost today" id="qToday">Ir a quincena actual</button>
+      </div>
+    </div>
+
+    <div class="grid3" id="dashStats"></div>
+
+    <div class="card">
+      <h2>Distribución de esta quincena</h2>
+      <div id="dashCategorias"></div>
+    </div>
+
+    <div class="card">
+      <h2>Gráficos</h2>
+      <div class="charts-wrap">
+        <div id="graficoDona"></div>
+        <div id="graficoBalance"></div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- INGRESOS -->
+  <section class="view" id="view-ingresos">
+    <div class="card">
+      <div class="qnav">
+        <button id="qPrev2">‹</button>
+        <div class="label" id="qLabel2">—</div>
+        <button id="qNext2">›</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Registrar ingreso</h2>
+      <div class="field">
+        <label>Concepto (sueldo, freelance, bono...)</label>
+        <input id="ingConcepto" placeholder="Ej: Sueldo quincenal">
+      </div>
+      <div class="field">
+        <label>Tipo de ingreso</label>
+        <select id="ingTipo">
+          <option value="nomina">💼 Nómina / sueldo</option>
+          <option value="freelance">🧑‍💻 Freelance / independiente</option>
+          <option value="venta">🏷️ Venta de algo</option>
+          <option value="cobranza">🤝 Cuenta por cobrar</option>
+          <option value="reembolso">↩️ Reembolso</option>
+          <option value="otro">➕ Otro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Monto</label>
+        <input id="ingMonto" type="text" inputmode="decimal" placeholder="0.00">
+      </div>
+      <button class="primary" id="btnAddIngreso">Agregar ingreso</button>
+    </div>
+    <div class="card">
+      <h2>Ingresos de esta quincena</h2>
+      <div id="listaIngresos"></div>
+    </div>
+  </section>
+
+  <!-- GASTOS -->
+  <section class="view" id="view-gastos">
+    <div class="card">
+      <div class="qnav">
+        <button id="qPrev3">‹</button>
+        <div class="label" id="qLabel3">—</div>
+        <button id="qNext3">›</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row between">
+        <h2 style="margin:0;">⚡ Gastos fijos (un toque)</h2>
+      </div>
+      <p class="sub" style="color:var(--text-muted);font-size:12.5px;margin:-6px 0 10px;">
+        Toca uno para agregarlo directo a esta quincena. Total fijo mensual: <strong id="plantillasTotal">$0</strong>
+      </p>
+      <div id="listaPlantillas"></div>
+      <button class="ghost" id="btnNuevaPlantilla" style="margin-top:4px;">+ Agregar gasto fijo nuevo</button>
+    </div>
+    <div class="card">
+      <h2>Registrar gasto</h2>
+      <div class="field">
+        <label>Categoría</label>
+        <select id="gastoCategoria"></select>
+      </div>
+      <div class="field" id="gastoDeudaWrap" style="display:none;">
+        <label>¿A qué deuda aplica?</label>
+        <select id="gastoDeuda"></select>
+      </div>
+      <div class="field" id="gastoMetodoWrap">
+        <label>¿Cómo pagaste esto?</label>
+        <select id="gastoMetodo">
+          <option value="ahorros">💰 Con mis ahorros / efectivo</option>
+          <option value="tarjeta">💳 Con tarjeta de crédito (se suma a mi deuda)</option>
+        </select>
+      </div>
+      <div class="field" id="gastoMetodoDeudaWrap" style="display:none;">
+        <label>¿Con cuál tarjeta?</label>
+        <select id="gastoMetodoDeuda"></select>
+      </div>
+      <div class="field">
+        <label>Concepto</label>
+        <input id="gastoConcepto" placeholder="Ej: Arriendo, Netflix, Cine...">
+      </div>
+      <div class="field">
+        <label>Monto</label>
+        <input id="gastoMonto" type="text" inputmode="decimal" placeholder="0.00">
+      </div>
+      <button class="primary" id="btnAddGasto">Agregar gasto</button>
+      <p class="empty" id="gastoAsignadoHint" style="text-align:left;padding:8px 0 0;"></p>
+    </div>
+    <div class="card">
+      <h2>Gastos de esta quincena</h2>
+      <div id="listaGastos"></div>
+    </div>
+  </section>
+
+  <!-- DEUDAS -->
+  <section class="view" id="view-deudas">
+    <div class="card">
+      <h2>Deudas pendientes</h2>
+      <div class="grid2">
+        <div class="stat red">
+          <div class="label">Total pendiente</div>
+          <div class="value" id="deudaTotalPendiente">$0</div>
+        </div>
+        <div class="stat orange">
+          <div class="label">Pago mínimo mensual sugerido</div>
+          <div class="value" id="deudaPagoMin">$0</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Agregar deuda</h2>
+      <div class="field">
+        <label>Nombre</label>
+        <input id="deudaNombre" placeholder="Ej: Préstamo, Deuda con un familiar...">
+      </div>
+      <div class="field">
+        <label>Tipo de deuda</label>
+        <select id="deudaTipo">
+          <option value="familiar">👪 Familiar</option>
+          <option value="moto">🏍️ Moto</option>
+          <option value="otra">📌 Otra</option>
+        </select>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Monto total original</label>
+          <input id="deudaTotal" type="text" inputmode="decimal" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Saldo pendiente actual</label>
+          <input id="deudaPendiente" type="text" inputmode="decimal" placeholder="0.00">
+        </div>
+      </div>
+      <div class="field">
+        <label>Pago mínimo mensual (opcional)</label>
+        <input id="deudaMinimo" type="text" inputmode="decimal" placeholder="0.00">
+      </div>
+      <button class="primary" id="btnAddDeuda">Agregar deuda</button>
+    </div>
+    <div class="card">
+      <h2>Mis deudas</h2>
+      <div id="listaDeudas"></div>
+    </div>
+  </section>
+
+  <!-- TARJETAS -->
+  <section class="view" id="view-tarjetas">
+    <div class="card" id="utilizacionGeneralCard"></div>
+    <div class="card">
+      <h2>Agregar tarjeta</h2>
+      <div class="field">
+        <label>Banco / nombre de la tarjeta</label>
+        <input id="tarjetaBanco" placeholder="Ej: Nu, Rappicard, Davivienda Gold...">
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Cupo total</label>
+          <input id="tarjetaCupo" type="text" inputmode="decimal" placeholder="0.00">
+        </div>
+        <div class="field">
+          <label>Cupo en uso (deuda actual)</label>
+          <input id="tarjetaUsado" type="text" inputmode="decimal" placeholder="0.00">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label>Día de corte (1-31)</label>
+          <input id="tarjetaCorte" type="number" min="1" max="31" step="1" placeholder="Ej: 28">
+        </div>
+        <div class="field">
+          <label>Día límite de pago (1-31)</label>
+          <input id="tarjetaPago" type="number" min="1" max="31" step="1" placeholder="Ej: 19">
+        </div>
+      </div>
+      <button class="primary" id="btnAddTarjeta">Agregar tarjeta</button>
+    </div>
+    <div class="card">
+      <h2>Mis tarjetas</h2>
+      <div id="listaTarjetas" style="margin-top:8px;"></div>
+    </div>
+  </section>
+
+  <!-- FONDO -->
+  <section class="view" id="view-fondo">
+    <div class="card">
+      <h2>🛟 Fondo de emergencia</h2>
+      <div class="stat green">
+        <div class="label">Saldo actual</div>
+        <div class="value" id="fondoSaldo" style="font-size:26px;">$0</div>
+      </div>
+      <p class="sub" id="fondoTexto" style="margin-top:10px;color:var(--text-muted);font-size:13px;"></p>
+    </div>
+    <div class="card">
+      <h2>Registrar movimiento</h2>
+      <div class="field">
+        <label>Tipo de movimiento</label>
+        <select id="fondoMovTipo">
+          <option value="aporte">💰 Aporte (ahorro al fondo)</option>
+          <option value="retiro">🚨 Retiro (tuve que usarlo)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Motivo (opcional, útil sobre todo en un retiro)</label>
+        <input id="fondoMovConcepto" placeholder="Ej: Me quedé sin dinero y usé el fondo, arreglo urgente...">
+      </div>
+      <div class="field">
+        <label>Monto</label>
+        <input id="fondoMovMonto" type="text" inputmode="decimal" placeholder="0.00">
+      </div>
+      <button class="primary" id="btnRegistrarMovFondo">Registrar movimiento</button>
+    </div>
+    <div class="card">
+      <h2>Movimientos del fondo</h2>
+      <div id="listaFondoMov"></div>
+    </div>
+  </section>
+
+  <!-- ESTADO / SEMÁFORO -->
+  <section class="view" id="view-estado">
+    <div class="card" id="semaforoGeneralCard"></div>
+    <div class="card">
+      <h2>📋 Tu estado financiero actual</h2>
+      <div id="estadoItems" style="margin-top:8px;"></div>
+    </div>
+  </section>
+
+  <!-- CONFIG -->
+  <section class="view" id="view-config">
+    <div class="card">
+      <h2>⚙️ Distribución inteligente de tus ingresos</h2>
+      <p class="sub" style="color:var(--text-muted);font-size:13px;margin-top:-6px;">Define qué porcentaje de cada ingreso se destina a cada categoría. Debe sumar 100%.</p>
+      <div id="pctInputs" style="margin-top:14px;"></div>
+      <div id="pctSumBanner" class="pct-sum-banner"></div>
+      <div class="row" style="margin-top:10px;">
+        <button class="primary" id="btnGuardarPct">Guardar distribución</button>
+        <button class="ghost" id="btnResetPct">Restaurar sugerida</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HISTORIAL -->
+  <section class="view" id="view-historial">
+    <div class="card">
+      <h2>Evolución</h2>
+      <div class="svg-chart-wrap" id="chartHistorialWrap"></div>
+      <div class="legend" style="margin-top:10px;">
+        <span class="item"><span class="dot" style="background:#16a34a;"></span>Ingresos</span>
+        <span class="item"><span class="dot" style="background:#dc2626;"></span>Gastos</span>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Quincenas registradas</h2>
+      <div class="scroll-x">
+        <table id="tablaHistorial">
+          <thead><tr><th>Quincena</th><th>Ingresos</th><th>Gastos</th><th>Saldo</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="card">
+      <h2>💾 Copia de seguridad</h2>
+      <p class="sub" style="color:var(--text-muted);font-size:12.5px;margin-top:-6px;">
+        Además del guardado automático (en este dispositivo y en la nube), puedes descargar un archivo con todos tus datos, o restaurar uno que hayas guardado antes.
+      </p>
+      <div class="row" style="gap:10px;flex-wrap:wrap;">
+        <button class="ghost" id="btnExportar" style="flex:1;min-width:150px;">⬇️ Exportar copia (.json)</button>
+        <button class="ghost" id="btnImportar" style="flex:1;min-width:150px;">⬆️ Restaurar copia</button>
+      </div>
+      <input type="file" id="inputImportar" accept="application/json" style="display:none;">
+    </div>
+  </section>
+
+</main>
+
+<script>
+/* ===================== DIAGNÓSTICO: errores siempre visibles ===================== */
+// Si algo revienta en cualquier parte del código (aunque sea en un botón
+// que "no hace nada" a simple vista), esto lo muestra en pantalla en vez
+// de quedar solo en la consola, que casi nadie puede ver en un celular.
+// Se define ANTES que todo lo demás para no perderse errores tempranos.
+window.addEventListener('error', (e) => {
+  try {
+    // Usa un elemento propio (#appErrorBanner), separado del toast normal
+    // (#appToast) que usa notify() para mensajes de éxito: así un error no
+    // deja "manchado" en rojo el aviso de la próxima acción que sí funcione.
+    let el = document.getElementById('appErrorBanner');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'appErrorBanner';
+      el.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:201;background:#dc2626;color:#fff;padding:12px 14px;border-radius:10px;font-size:12.5px;box-shadow:0 1px 3px rgba(0,0,0,0.4);text-align:left;white-space:pre-wrap;';
+      document.body.appendChild(el);
+    }
+    el.style.opacity = '1';
+    el.textContent = '⚠️ Error: ' + (e.message || 'desconocido') + (e.filename ? ` (línea ${e.lineno})` : '');
+    clearTimeout(el._hideTimer);
+    el._hideTimer = setTimeout(() => { el.style.opacity = '0'; }, 8000);
+  } catch (err) { /* si hasta esto falla, no hay más que hacer */ }
+});
+window.addEventListener('unhandledrejection', (e) => {
+  console.error('Promise rechazada sin manejar:', e.reason);
+});
+
+/* ===================== DATA MODEL ===================== */
+const STORAGE_KEY = 'finanzas-quincenales-v1';
+
+const CATEGORIAS = [
+  { key: 'gastosBasicos', label: 'Gastos básicos', icon: '🏠', color: '#2f6fed' },
+  { key: 'suscripciones', label: 'Suscripciones', icon: '📱', color: '#7c3aed' },
+  { key: 'ocio', label: 'Ocio', icon: '🎉', color: '#d97706' },
+  { key: 'deudas', label: 'Deudas', icon: '💳', color: '#dc2626' },
+  { key: 'ahorro', label: 'Fondo de emergencia', icon: '🛟', color: '#16a34a' },
+];
+
+const TIPOS_DEUDA = {
+  familiar: { label: 'Familiar', icon: '👪' },
+  tarjeta: { label: 'Tarjeta de crédito', icon: '💳' },
+  moto: { label: 'Moto', icon: '🏍️' },
+  otra: { label: 'Otra', icon: '📌' },
+};
+
+const TIPOS_INGRESO = {
+  nomina: { label: 'Nómina / sueldo', icon: '💼' },
+  freelance: { label: 'Freelance / independiente', icon: '🧑‍💻' },
+  venta: { label: 'Venta de algo', icon: '🏷️' },
+  cobranza: { label: 'Cuenta por cobrar', icon: '🤝' },
+  reembolso: { label: 'Reembolso', icon: '↩️' },
+  otro: { label: 'Otro', icon: '➕' },
+};
+
+// Suma el saldo pendiente de todas las deudas de un tipo dado
+// (familiar / tarjeta / moto / otra). Alimenta el semáforo de Estado.
+function sumaDeudasPorTipo(tipo) {
+  return data.deudas.filter(d => d.tipo === tipo).reduce((s, d) => s + (d.pendiente || 0), 0);
+}
+
+// v2: distribución ajustada el 19-sep para arrancar la quincena del 16-30 de
+// septiembre (pago del 30) con más peso en deudas y fondo de emergencia,
+// aprovechando que no hay arriendo y los gastos fijos son bajos (~22% del ingreso).
+const CONFIG_VERSION = 2;
+const DEFAULT_PCT = { gastosBasicos: 30, suscripciones: 7, ocio: 8, deudas: 30, ahorro: 25 };
+
+// Tus tarjetas reales, registradas el 20 de septiembre: cupo total (límite
+// fijo del banco), cupo en uso (= "pendiente", igual que cualquier otra
+// deuda tipo "tarjeta"), fecha de corte y fecha límite de pago (día del
+// mes). Se usan tanto para la precarga inicial como para la migración de
+// usuarios que ya tenían datos.
+//
+// IMPORTANTE: "total" aquí NO es el cupo del banco (eso es "cupoTotal", que
+// puede ser un número enorme y no dice nada sobre tu deuda real). "total"
+// es el monto de la deuda que realmente llevas con esa tarjeta en este
+// momento, arrancando igual al "pendiente" actual: así, en 💳 Deudas, la
+// barra de "% pagado" refleja tu propio progreso pagando lo que debes, no
+// qué tanto del cupo del banco usas (eso ya se ve en 🪪 Tarjetas). Cada
+// compra nueva con la tarjeta sube "total" y "pendiente" juntos; cada abono
+// baja solo "pendiente" — igual que cualquier otra deuda.
+const TARJETAS_SEED_VERSION = 2;
+const TARJETAS_SEED = [
+  { id: 'card-nu', nombre: 'Nu', tipo: 'tarjeta', cupoTotal: 1000000, total: 0, pendiente: 0, minimo: 0, fechaCorte: 28, fechaPago: 19 },
+  { id: 'card-rappicard', nombre: 'Rappicard', tipo: 'tarjeta', cupoTotal: 2500000, total: 1599900, pendiente: 1599900, minimo: 0, fechaCorte: 20, fechaPago: 31 },
+  { id: 'card-davivienda-mac', nombre: 'Davivienda Mac Center', tipo: 'tarjeta', cupoTotal: 7100000, total: 0, pendiente: 0, minimo: 0, fechaCorte: 23, fechaPago: 10 },
+  { id: 'card-davivienda-gold', nombre: 'Davivienda Gold', tipo: 'tarjeta', cupoTotal: 9700000, total: 0, pendiente: 0, minimo: 0, fechaCorte: 8, fechaPago: 25 },
+  { id: 'card-bogota-platinum', nombre: 'Banco de Bogotá Platinum', tipo: 'tarjeta', cupoTotal: 12900000, total: 210003, pendiente: 210003, minimo: 0, fechaCorte: 31, fechaPago: 21 },
+];
+
+// Migración (una sola vez): antes, "total" de una tarjeta arrancaba igual a
+// su cupo del banco, así que 💳 Deudas mostraba "% pagado" contra el cupo
+// completo (ej: "98% pagado de $12.900.000") — un número alarmante y sin
+// relación con la deuda real. Este arreglo resetea "total" al "pendiente"
+// actual de cada tarjeta, para que el progreso se calcule sobre lo que de
+// verdad debes, no sobre el límite del banco.
+const TARJETAS_TOTAL_FIX_VERSION = 1;
+
+// Datos iniciales precargados a partir del ingreso del 15 de septiembre.
+// Solo se usan la primera vez que se abre la app (si no hay nada guardado aún).
+function defaultData() {
+  return {
+    configVersion: CONFIG_VERSION,
+    tarjetasSeedVersion: TARJETAS_SEED_VERSION,
+    pct: { ...DEFAULT_PCT },
+    quincenas: {
+      '2026-09-Q1': {
+        ingresos: [{ id: 'seed-ingreso-1', concepto: 'Ingreso quincenal', tipo: 'nomina', monto: 1337896 }],
+        gastos: [],
+      },
+    },
+    deudas: [
+      { id: 'seed-deuda-abuela', nombre: 'Deuda con la abuela', tipo: 'familiar', total: 5300000, pendiente: 4800000, minimo: 0 },
+      ...TARJETAS_SEED.map(t => ({ ...t })),
+    ],
+    fondo: {
+      actual: 600000,
+      movimientos: [
+        { id: 'seed-fondo-inicial', tipo: 'aporte', concepto: 'Saldo inicial', monto: 600000, fecha: Date.now() },
+      ],
+    },
+    estado: {
+      fondoEmergencia: 600000,
+      cajaOperativa: 108615,
+      deudasFamiliares: 4800000,
+      deudasTarjetas: 1500000,
+      cuentasPorCobrar: 583503,
+      deudaMoto: 0,
+    },
+    // Gastos fijos mensuales para agregar con un toque en la pestaña Gastos.
+    // No pagas renta, así que no aparece aquí.
+    plantillas: [
+      { id: 'pl-apple-music', nombre: 'Apple Music', categoria: 'suscripciones', monto: 9900 },
+      { id: 'pl-tigo', nombre: 'Tigo', categoria: 'suscripciones', monto: 59950 },
+      { id: 'pl-icloud', nombre: 'iCloud', categoria: 'suscripciones', monto: 3900 },
+      { id: 'pl-claude', nombre: 'Claude', categoria: 'suscripciones', monto: 99900 },
+      { id: 'pl-luz', nombre: 'Factura de luz (colaboración)', categoria: 'gastosBasicos', monto: 75000 },
+      { id: 'pl-aseo', nombre: 'Señora del aseo (colaboración)', categoria: 'gastosBasicos', monto: 85000 },
+      { id: 'pl-gato', nombre: 'Comida y arena del gato', categoria: 'gastosBasicos', monto: 150000 },
+      { id: 'pl-transmilenio', nombre: 'Transmilenio', categoria: 'gastosBasicos', monto: 120000 },
+    ],
+  };
+}
+
+// Aplica migraciones sobre un objeto de datos "crudo" (recién parseado de
+// localStorage, de la nube, o de un archivo restaurado) y devuelve un
+// objeto de datos completo y consistente.
+function normalizeData(parsed) {
+  parsed = parsed && typeof parsed === 'object' ? parsed : {};
+  // Clona el dato de entrada por completo antes de tocarlo. "parsed" puede
+  // venir de la nube (snap.data()), y esos documentos a veces llegan
+  // congelados/de solo lectura para evitar mutaciones accidentales fuera de
+  // set()/update(). Si el código de más abajo intenta modificar esos
+  // objetos anidados directamente (ej: q.ingresos.push(...), d.pendiente =
+  // ...), en Safari eso lanza "Attempted to assign to readonly property" —
+  // y como no está en modo estricto, en otros navegadores el mismo intento
+  // simplemente no hace nada, sin error visible (por eso un botón podía
+  // "no servir" solo en ciertos dispositivos). Un clon vía JSON rompe
+  // cualquier referencia de solo lectura, dejando todo 100% editable.
+  try {
+    parsed = JSON.parse(JSON.stringify(parsed));
+  } catch (e) { /* si esto falla, seguimos con el original */ }
+  // Si el dato guardado es de una versión de configuración anterior,
+  // se refresca la distribución de porcentajes a la nueva recomendada
+  // (una sola vez); de ahí en adelante los cambios manuales del usuario mandan.
+  const needsPctMigration = !parsed.configVersion || parsed.configVersion < CONFIG_VERSION;
+  const merged = {
+    ...defaultData(),
+    ...parsed,
+    configVersion: CONFIG_VERSION,
+    pct: needsPctMigration ? { ...DEFAULT_PCT } : { ...DEFAULT_PCT, ...(parsed.pct || {}) },
+    estado: { ...defaultData().estado, ...(parsed.estado || {}) },
+  };
+  // Migración: toda deuda debe tener un "tipo" (familiar/tarjeta/moto/otra)
+  // para que el semáforo de Estado pueda sumarlas automáticamente.
+  merged.deudas = (merged.deudas || []).map(d => {
+    const dd = { ...d };
+    if (!dd.tipo) dd.tipo = 'otra';
+    return dd;
+  });
+  // Migración (una sola vez): reemplaza el placeholder genérico "Tarjetas de
+  // crédito" por tus tarjetas reales (Nu, Rappicard, Davivienda, Bogotá...),
+  // sin tocar ninguna tarjeta u otra deuda que ya hayas agregado tú mismo.
+  if (!parsed.tarjetasSeedVersion || parsed.tarjetasSeedVersion < TARJETAS_SEED_VERSION) {
+    merged.deudas = merged.deudas.filter(d => d.id !== 'seed-deuda-tarjetas');
+    TARJETAS_SEED.forEach(t => {
+      if (!merged.deudas.some(d => d.id === t.id)) merged.deudas.push({ ...t });
+    });
+    merged.tarjetasSeedVersion = TARJETAS_SEED_VERSION;
+  }
+  // Migración (una sola vez): resetea "total" de cada tarjeta a su
+  // "pendiente" actual (ver comentario junto a TARJETAS_TOTAL_FIX_VERSION),
+  // para que el progreso en 💳 Deudas ya no se calcule contra el cupo del
+  // banco. No toca cupoTotal, fechas, ni ninguna otra deuda que no sea tarjeta.
+  if (!parsed.tarjetasTotalFixVersion || parsed.tarjetasTotalFixVersion < TARJETAS_TOTAL_FIX_VERSION) {
+    merged.deudas = merged.deudas.map(d => d.tipo === 'tarjeta' ? { ...d, total: d.pendiente || 0 } : d);
+    merged.tarjetasTotalFixVersion = TARJETAS_TOTAL_FIX_VERSION;
+  }
+  // Migración: el Fondo ya no usa "meta" ni un campo "Actual" editable a
+  // mano — ahora es un historial de movimientos (aportes/retiros) y el
+  // saldo se calcula solo. Si ya tenías un saldo guardado (de antes de este
+  // cambio) y todavía no tienes historial, se crea un único movimiento que
+  // lo representa, para no perder ese dinero ya ahorrado.
+  if (!merged.fondo || !Array.isArray(merged.fondo.movimientos)) {
+    const actualPrevio = (merged.fondo && merged.fondo.actual) || 0;
+    merged.fondo = {
+      actual: actualPrevio,
+      movimientos: actualPrevio > 0
+        ? [{ id: 'migracion-fondo-inicial', tipo: 'aporte', concepto: 'Saldo antes de este cambio', monto: actualPrevio, fecha: Date.now() }]
+        : [],
+    };
+  }
+  // Migración: todo ingreso debe tener un "tipo" (nómina/freelance/venta/
+  // cobranza/reembolso/otro) y todo gasto un "metodoPago" (ahorros/tarjeta).
+  Object.keys(merged.quincenas || {}).forEach(qid => {
+    const q = merged.quincenas[qid];
+    if (q && Array.isArray(q.ingresos)) {
+      q.ingresos = q.ingresos.map(i => {
+        const ii = { ...i };
+        if (!ii.tipo) ii.tipo = 'otro';
+        return ii;
+      });
+    }
+    if (q && Array.isArray(q.gastos)) {
+      q.gastos = q.gastos.map(g => {
+        const gg = { ...g };
+        if (!gg.metodoPago) gg.metodoPago = 'ahorros';
+        return gg;
+      });
+    }
+  });
+  return merged;
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultData();
+    const parsed = JSON.parse(raw);
+    return normalizeData(parsed);
+  } catch (e) {
+    console.error('Error cargando datos', e);
+    return defaultData();
+  }
+}
+
+// Guarda solo en este dispositivo (sin disparar la sincronización en la
+// nube). Se usa cuando el dato ya viene de la nube o de un import, para no
+// generar un ciclo de guardado innecesario.
+function saveDataLocalOnly() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error('Error guardando datos', e);
+  }
+}
+
+function saveData() {
+  data.updatedAt = Date.now();
+  saveDataLocalOnly();
+  scheduleCloudSave();
+}
+
+let data = loadData();
+
+/* ===================== QUINCENA HELPERS ===================== */
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function getCurrentQuincenaId(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const q = d.getDate() <= 15 ? 'Q1' : 'Q2';
+  return `${y}-${m}-${q}`;
+}
+function parseQId(id) {
+  const [y, m, q] = id.split('-');
+  return { y: parseInt(y), m: parseInt(m), q };
+}
+function makeQId(y, m, q) {
+  return `${y}-${String(m).padStart(2,'0')}-${q}`;
+}
+function qLabel(id) {
+  const { y, m, q } = parseQId(id);
+  const rango = q === 'Q1' ? '1 – 15' : `16 – fin`;
+  return `${rango} ${MESES[m-1]} ${y}`;
+}
+function nextQId(id) {
+  const { y, m, q } = parseQId(id);
+  if (q === 'Q1') return makeQId(y, m, 'Q2');
+  let ny = y, nm = m + 1;
+  if (nm > 12) { nm = 1; ny++; }
+  return makeQId(ny, nm, 'Q1');
+}
+function prevQId(id) {
+  const { y, m, q } = parseQId(id);
+  if (q === 'Q2') return makeQId(y, m, 'Q1');
+  let ny = y, nm = m - 1;
+  if (nm < 1) { nm = 12; ny--; }
+  return makeQId(ny, nm, 'Q2');
+}
+function getQ(id) {
+  if (!data.quincenas[id]) data.quincenas[id] = { ingresos: [], gastos: [] };
+  return data.quincenas[id];
+}
+function qTotalIngresos(id) {
+  const q = data.quincenas[id];
+  if (!q) return 0;
+  return q.ingresos.reduce((s, i) => s + i.monto, 0);
+}
+function qTotalGastos(id) {
+  const q = data.quincenas[id];
+  if (!q) return 0;
+  return q.gastos.reduce((s, g) => s + g.monto, 0);
+}
+function qGastosPorCategoria(id, cat) {
+  const q = data.quincenas[id];
+  if (!q) return 0;
+  return q.gastos.filter(g => g.categoria === cat).reduce((s, g) => s + g.monto, 0);
+}
+
+let currentQId = getCurrentQuincenaId();
+
+/* ===================== FORMAT ===================== */
+function fmt(n) {
+  n = Number(n) || 0;
+  return '$' + n.toLocaleString('es-CO', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+// Convierte un monto escrito a mano (posiblemente con el mismo formato
+// colombiano que usa fmt() para MOSTRAR los números, ej: "50.000" o
+// "1.599.900") a un número real. Antes los campos de monto eran
+// type="number", que interpreta el "." como separador DECIMAL: si
+// escribías "50.000" pensando en 50 mil pesos, el campo lo leía como 50
+// (cincuenta) — el gasto se agregaba silenciosamente por un valor
+// insignificante o, si además usabas una coma, el campo podía quedar
+// vacío y el botón "no hacía nada". Esta función asume pesos colombianos
+// sin decimales: quita los puntos y comas usados como separador de miles
+// y sólo conserva una coma o punto final seguido de 1-2 dígitos como
+// decimales reales (caso raro, pero se soporta por si acaso).
+function parseMonto(str) {
+  if (str == null) return NaN;
+  let s = String(str).trim();
+  if (!s) return NaN;
+  const neg = /^-/.test(s);
+  s = s.replace(/^-/, '');
+  // ¿Termina en ",NN" o ".NN" (1-2 dígitos) y hay más de un separador
+  // antes? Entonces ese último es el decimal real; el resto son miles.
+  const m = s.match(/^([\d.,]*?)[.,](\d{1,2})$/);
+  let intPart = s, decPart = '';
+  if (m && (m[1].includes('.') || m[1].includes(','))) {
+    intPart = m[1];
+    decPart = m[2];
+  }
+  intPart = intPart.replace(/[.,]/g, '');
+  const n = parseFloat(intPart + (decPart ? '.' + decPart : ''));
+  return neg ? -n : n;
+}
+
+// Muestra un mensaje breve en pantalla. Usa alert() cuando está disponible,
+// pero SIEMPRE además pinta un aviso propio en la parte superior: si la
+// app corre dentro de una vista incrustada que bloquea los diálogos
+// nativos, alert() no hace nada (ni error ni aviso), y un botón que en
+// realidad sí validó algo puede parecer que "no sirve". Con este aviso
+// propio, el mensaje se ve siempre.
+function notify(msg) {
+  try { alert(msg); } catch (e) {}
+  let el = document.getElementById('appToast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'appToast';
+    el.style.cssText = 'position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:200;background:var(--text);color:var(--bg-card);padding:12px 14px;border-radius:10px;font-size:13.5px;box-shadow:var(--shadow);text-align:center;transition:opacity .2s;';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity = '1';
+  clearTimeout(el._hideTimer);
+  el._hideTimer = setTimeout(() => { el.style.opacity = '0'; }, 3500);
+}
+
+/* ===================== SINCRONIZACIÓN EN LA NUBE (db capability) ===================== */
+// Además de localStorage (rápido, funciona sin conexión), guardamos una
+// copia en la nube ligada a tu cuenta, para que los datos no dependan de
+// que el navegador/dispositivo conserve la memoria local entre sesiones.
+let cloudDb = null;
+let cloudSaveTimer = null;
+let cloudSaveInFlight = false;
+let pendingCloudSave = false;
+let lastSyncInfo = { state: 'local', at: null }; // local | syncing | synced | unavailable | error
+
+function renderSaveStatus() {
+  const el = document.getElementById('saveStatusRow');
+  if (!el) return;
+  const t = lastSyncInfo.at ? new Date(lastSyncInfo.at).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }) : '';
+  const map = {
+    local: '💾 Guardado en este dispositivo',
+    syncing: '☁️ Guardando en la nube…',
+    synced: `☁️ Sincronizado en la nube · ${t}`,
+    unavailable: '💾 Guardado en este dispositivo (nube no disponible aquí — exporta una copia en Historial)',
+    error: '⚠️ Guardado en este dispositivo · no se pudo sincronizar en la nube',
+  };
+  el.textContent = map[lastSyncInfo.state] || '';
+}
+
+async function flushCloudSave() {
+  if (!cloudDb) return;
+  if (cloudSaveInFlight) { pendingCloudSave = true; return; }
+  cloudSaveInFlight = true;
+  lastSyncInfo = { state: 'syncing', at: Date.now() };
+  renderSaveStatus();
+  try {
+    await cloudDb.doc('estado/principal').set({ ...data, updatedAt: data.updatedAt || Date.now() });
+    lastSyncInfo = { state: 'synced', at: Date.now() };
+  } catch (e) {
+    console.error('Error guardando en la nube', e);
+    lastSyncInfo = { state: 'error', at: Date.now() };
+  }
+  cloudSaveInFlight = false;
+  renderSaveStatus();
+  if (pendingCloudSave) { pendingCloudSave = false; flushCloudSave(); }
+}
+
+function scheduleCloudSave() {
+  if (!cloudDb) return;
+  clearTimeout(cloudSaveTimer);
+  cloudSaveTimer = setTimeout(flushCloudSave, 900);
+}
+
+async function initCloudSync() {
+  try {
+    if (!window.claude || typeof window.claude.use !== 'function') {
+      lastSyncInfo = { state: 'unavailable', at: null };
+      renderSaveStatus();
+      return;
+    }
+    const db = await window.claude.use('db');
+    if (!db) {
+      lastSyncInfo = { state: 'unavailable', at: null };
+      renderSaveStatus();
+      return;
+    }
+    cloudDb = db;
+    const snap = await cloudDb.doc('estado/principal').get();
+    if (snap.exists) {
+      const remote = snap.data() || {};
+      const remoteUpdated = remote.updatedAt || 0;
+      const localUpdated = data.updatedAt || 0;
+      if (remoteUpdated >= localUpdated) {
+        // La nube tiene la versión más reciente (p.ej. la editaste en otro
+        // dispositivo, o esta pestaña se abrió sin memoria local).
+        data = normalizeData(remote);
+        saveDataLocalOnly();
+        renderAll();
+      } else {
+        // Lo local es más nuevo (editado sin conexión a la nube): lo subimos.
+        flushCloudSave();
+      }
+    } else {
+      // Primera vez que esta app se conecta a la nube: sube el estado actual como semilla.
+      flushCloudSave();
+    }
+    lastSyncInfo = { state: 'synced', at: Date.now() };
+    renderSaveStatus();
+  } catch (e) {
+    console.error('No se pudo inicializar la sincronización en la nube', e);
+    lastSyncInfo = { state: 'unavailable', at: null };
+    renderSaveStatus();
+  }
+}
+
+/* ===================== EFFECTS (link gastos to fondo/deudas) ===================== */
+function applyGastoEffect(gasto, sign) {
+  if (gasto.categoria === 'ahorro') {
+    data.fondo.actual = Math.max(0, (data.fondo.actual || 0) + sign * gasto.monto);
+  }
+  if (gasto.categoria === 'deudas' && gasto.deudaId) {
+    const d = data.deudas.find(x => x.id === gasto.deudaId);
+    if (d) d.pendiente = Math.max(0, d.pendiente - sign * gasto.monto);
+  }
+  // Si el gasto se pagó con tarjeta de crédito (y no es ya un pago de deuda),
+  // el monto se SUMA a la tarjeta seleccionada: quedó financiado, no pagado.
+  if (gasto.categoria !== 'deudas' && gasto.metodoPago === 'tarjeta' && gasto.deudaId) {
+    const d = data.deudas.find(x => x.id === gasto.deudaId);
+    if (d) {
+      d.pendiente = Math.max(0, (d.pendiente || 0) + sign * gasto.monto);
+      d.total = Math.max(0, (d.total || 0) + sign * gasto.monto);
+    }
+  }
+}
+
+/* ===================== TABS ===================== */
+const tabButtons = document.querySelectorAll('#tabs button');
+tabButtons.forEach(btn => {
+  btn.addEventListener('click', () => {
+    tabButtons.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + btn.dataset.view).classList.add('active');
+    renderAll();
+  });
+});
+
+/* ===================== QUINCENA NAV (3 copies of the widget) ===================== */
+function bindQNav(prevId, nextId, todayId) {
+  const p = document.getElementById(prevId);
+  const n = document.getElementById(nextId);
+  if (p) p.addEventListener('click', () => { currentQId = prevQId(currentQId); renderAll(); });
+  if (n) n.addEventListener('click', () => { currentQId = nextQId(currentQId); renderAll(); });
+  if (todayId) document.getElementById(todayId).addEventListener('click', () => { currentQId = getCurrentQuincenaId(); renderAll(); });
+}
+bindQNav('qPrev', 'qNext', 'qToday');
+bindQNav('qPrev2', 'qNext2');
+bindQNav('qPrev3', 'qNext3');
+
+/* ===================== RENDER: labels ===================== */
+function renderQLabels() {
+  ['qLabel', 'qLabel2', 'qLabel3'].forEach(id => {
+    document.getElementById(id).textContent = qLabel(currentQId);
+  });
+}
+
+/* ===================== RENDER: DASHBOARD ===================== */
+function renderDashboard() {
+  const ingresoTotal = qTotalIngresos(currentQId);
+  const gastoTotal = qTotalGastos(currentQId);
+  const saldo = ingresoTotal - gastoTotal;
+
+  const statsHtml = `
+    <div class="stat">
+      <div class="label">Ingreso total</div>
+      <div class="value">${fmt(ingresoTotal)}</div>
+    </div>
+    <div class="stat orange">
+      <div class="label">Gastado</div>
+      <div class="value">${fmt(gastoTotal)}</div>
+    </div>
+    <div class="stat ${saldo >= 0 ? 'green' : 'red'}">
+      <div class="label">Saldo disponible</div>
+      <div class="value">${fmt(saldo)}</div>
+    </div>
+  `;
+  document.getElementById('dashStats').innerHTML = statsHtml;
+
+  // Categorías
+  let catHtml = '';
+  CATEGORIAS.forEach(cat => {
+    const pct = data.pct[cat.key] || 0;
+    const asignado = ingresoTotal * pct / 100;
+    const gastado = qGastosPorCategoria(currentQId, cat.key);
+    const disponible = asignado - gastado;
+    const pctUsado = asignado > 0 ? Math.min(100, (gastado / asignado) * 100) : (gastado > 0 ? 100 : 0);
+    let chip = '<span class="chip ok">Al día</span>';
+    if (pctUsado >= 100) chip = '<span class="chip bad">Excedido</span>';
+    else if (pctUsado >= 80) chip = '<span class="chip warn">Cerca del límite</span>';
+
+    catHtml += `
+      <div class="cat-row">
+        <div class="row between">
+          <span>${cat.icon} <strong>${cat.label}</strong> (${pct}%)</span>
+          ${chip}
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${pctUsado}%; background:${cat.color};"></div>
+        </div>
+        <div class="sub row between">
+          <span>Gastado: ${fmt(gastado)} de ${fmt(asignado)} asignado</span>
+          <span>${disponible >= 0 ? 'Disponible: ' + fmt(disponible) : 'Excedido: ' + fmt(Math.abs(disponible))}</span>
+        </div>
+      </div>
+    `;
+  });
+  document.getElementById('dashCategorias').innerHTML = catHtml || '<div class="empty">Registra un ingreso para ver la distribución.</div>';
+
+  renderDonut(ingresoTotal);
+  renderBalanceBars(ingresoTotal, gastoTotal);
+}
+
+/* --- Donut de distribución (CSS conic-gradient, sin librerías) --- */
+function renderDonut(ingresoTotal) {
+  const wrap = document.getElementById('graficoDona');
+  const activos = CATEGORIAS.filter(c => (data.pct[c.key] || 0) > 0);
+  if (!activos.length || ingresoTotal <= 0) {
+    wrap.innerHTML = '<div class="empty">Registra un ingreso para ver el gráfico.</div>';
+    return;
+  }
+  let acc = 0;
+  const stops = activos.map(c => {
+    const start = acc;
+    acc += (data.pct[c.key] || 0);
+    return `${c.color} ${start}% ${acc}%`;
+  }).join(', ');
+
+  const legendHtml = activos.map(c => `
+    <span class="item"><span class="dot" style="background:${c.color};"></span>${c.icon} ${c.label} (${data.pct[c.key]}%)</span>
+  `).join('');
+
+  wrap.innerHTML = `
+    <div class="donut-wrap">
+      <div class="donut" style="background:conic-gradient(${stops});">
+        <div class="donut-hole">
+          <span class="amt">${fmt(ingresoTotal)}</span>
+          <span class="lbl">ingreso quincenal</span>
+        </div>
+      </div>
+      <div class="legend">${legendHtml}</div>
+    </div>
+  `;
+}
+
+/* --- Barras de balance ingreso vs gastado (divs simples) --- */
+function renderBalanceBars(ingresoTotal, gastoTotal) {
+  const wrap = document.getElementById('graficoBalance');
+  const max = Math.max(ingresoTotal, gastoTotal, 1);
+  const pctIng = Math.min(100, (ingresoTotal / max) * 100);
+  const pctGas = Math.min(100, (gastoTotal / max) * 100);
+  wrap.innerHTML = `
+    <div class="balance-wrap">
+      <div class="balance-row">
+        <div class="row between"><span>💰 Ingreso total</span><strong>${fmt(ingresoTotal)}</strong></div>
+        <div class="balance-track"><div class="balance-fill" style="width:${pctIng}%; background:var(--green);"></div></div>
+      </div>
+      <div class="balance-row">
+        <div class="row between"><span>🧾 Gastado</span><strong>${fmt(gastoTotal)}</strong></div>
+        <div class="balance-track"><div class="balance-fill" style="width:${pctGas}%; background:var(--red);"></div></div>
+      </div>
+    </div>
+  `;
+}
+
+/* ===================== RENDER: INGRESOS ===================== */
+function renderIngresos() {
+  const q = getQ(currentQId);
+  const html = q.ingresos.length ? q.ingresos.map(i => {
+    const tipo = TIPOS_INGRESO[i.tipo] || TIPOS_INGRESO.otro;
+    return `
+    <div class="list-item">
+      <div class="li-main">
+        <span class="t1">${escapeHtml(i.concepto)}</span>
+        <span class="t2">${tipo.icon} ${tipo.label}</span>
+      </div>
+      <div class="row">
+        <span class="amt" style="color:var(--green);">+${fmt(i.monto)}</span>
+        <button class="del-btn" onclick="deleteIngreso('${i.id}')">✕</button>
+      </div>
+    </div>
+  `;
+  }).join('') : '<div class="empty">Aún no registras ingresos en esta quincena.</div>';
+  document.getElementById('listaIngresos').innerHTML = html;
+}
+
+function deleteIngreso(id) {
+  const q = getQ(currentQId);
+  q.ingresos = q.ingresos.filter(i => i.id !== id);
+  saveData();
+  renderAll();
+}
+
+document.getElementById('btnAddIngreso').addEventListener('click', () => {
+  const concepto = document.getElementById('ingConcepto').value.trim() || 'Ingreso';
+  const tipo = document.getElementById('ingTipo').value || 'otro';
+  const monto = parseMonto(document.getElementById('ingMonto').value);
+  if (!monto || monto <= 0) { notify('Ingresa un monto válido.'); return; }
+  const q = getQ(currentQId);
+  q.ingresos.push({ id: crypto.randomUUID(), concepto, tipo, monto });
+  // Si marcaste este ingreso como "Cuenta por cobrar", ofrecemos descontarlo
+  // automáticamente del valor que tienes registrado en 🚦 Estado.
+  if (tipo === 'cobranza' && (data.estado.cuentasPorCobrar || 0) > 0) {
+    if (confirm(`¿Este ingreso de ${fmt(monto)} corresponde a una cuenta por cobrar que ya tenías registrada? Si aceptas, se descuenta de "Cuentas por cobrar" en la pestaña Estado.`)) {
+      data.estado.cuentasPorCobrar = Math.max(0, (data.estado.cuentasPorCobrar || 0) - monto);
+    }
+  }
+  saveData();
+  document.getElementById('ingConcepto').value = '';
+  document.getElementById('ingMonto').value = '';
+  renderAll();
+});
+
+/* ===================== RENDER: GASTOS ===================== */
+function populateGastoCategoriaSelect() {
+  const sel = document.getElementById('gastoCategoria');
+  // El Fondo de emergencia ya no se registra como una categoría de gasto:
+  // esos movimientos (aportes/retiros) se manejan solo desde su propia
+  // pestaña 🛟 Fondo, para no duplicar el mismo dinero por dos caminos.
+  sel.innerHTML = CATEGORIAS.filter(c => c.key !== 'ahorro').map(c => `<option value="${c.key}">${c.icon} ${c.label}</option>`).join('');
+}
+function deudasActivas() {
+  // Solo deudas con saldo pendiente real: no tiene sentido abonar a algo
+  // en $0 (incluye tarjetas sin uso, que no deberían ofrecerse aquí).
+  return data.deudas.filter(d => (d.pendiente || 0) > 0);
+}
+function populateGastoDeudaSelect() {
+  const sel = document.getElementById('gastoDeuda');
+  const activas = deudasActivas();
+  sel.innerHTML = activas.map(d => `<option value="${d.id}">${escapeHtml(d.nombre)} (pendiente ${fmt(d.pendiente)})</option>`).join('')
+    || '<option value="">Sin deudas activas</option>';
+}
+function populateGastoMetodoDeudaSelect() {
+  const sel = document.getElementById('gastoMetodoDeuda');
+  if (!sel) return;
+  const tarjetas = data.deudas.filter(d => d.tipo === 'tarjeta');
+  const opts = tarjetas.map(d => `<option value="${d.id}">${escapeHtml(d.nombre)} (pendiente ${fmt(d.pendiente)})</option>`).join('');
+  sel.innerHTML = opts + '<option value="_new">+ Crear una tarjeta nueva</option>';
+}
+document.getElementById('gastoCategoria').addEventListener('change', updateGastoFormUI);
+document.getElementById('gastoMetodo').addEventListener('change', updateGastoFormUI);
+function updateGastoFormUI() {
+  const cat = document.getElementById('gastoCategoria').value;
+  const esDeuda = cat === 'deudas';
+  document.getElementById('gastoDeudaWrap').style.display = (esDeuda && deudasActivas().length) ? 'block' : 'none';
+  // El método de pago (ahorros/tarjeta) no aplica cuando el gasto YA ES un
+  // pago de deuda: eso se gestiona con el selector de deuda de arriba.
+  document.getElementById('gastoMetodoWrap').style.display = esDeuda ? 'none' : 'block';
+  const metodo = document.getElementById('gastoMetodo').value;
+  const mostrarTarjeta = !esDeuda && metodo === 'tarjeta';
+  document.getElementById('gastoMetodoDeudaWrap').style.display = mostrarTarjeta ? 'block' : 'none';
+  if (mostrarTarjeta) populateGastoMetodoDeudaSelect();
+  const ingresoTotal = qTotalIngresos(currentQId);
+  const asignado = ingresoTotal * (data.pct[cat] || 0) / 100;
+  const gastado = qGastosPorCategoria(currentQId, cat);
+  const disp = asignado - gastado;
+  document.getElementById('gastoAsignadoHint').textContent =
+    `Disponible en "${CATEGORIAS.find(c=>c.key===cat)?.label}": ${fmt(disp)} (de ${fmt(asignado)} asignado)`;
+}
+
+/* ===================== PLANTILLAS DE GASTOS FIJOS ===================== */
+function renderPlantillas() {
+  const wrap = document.getElementById('listaPlantillas');
+  const plantillas = data.plantillas || [];
+  const total = plantillas.reduce((s, p) => s + p.monto, 0);
+  document.getElementById('plantillasTotal').textContent = fmt(total);
+
+  wrap.innerHTML = plantillas.length ? plantillas.map(p => {
+    const cat = CATEGORIAS.find(c => c.key === p.categoria);
+    return `
+      <div class="row" style="gap:6px;">
+        <button class="plantilla-btn" onclick="agregarDesdePlantilla('${p.id}')">
+          <span class="pl-info">
+            <span class="t1">${cat ? cat.icon : ''} ${escapeHtml(p.nombre)}</span>
+            <span class="t2">${cat ? cat.label : p.categoria}</span>
+          </span>
+          <span class="pl-amt">${fmt(p.monto)}</span>
+        </button>
+        <button class="plantilla-del" onclick="eliminarPlantilla('${p.id}')" title="Eliminar plantilla">✕</button>
+      </div>
+    `;
+  }).join('') : '<div class="empty">No tienes gastos fijos guardados todavía.</div>';
+}
+
+function agregarDesdePlantilla(id) {
+  const p = (data.plantillas || []).find(x => x.id === id);
+  if (!p) return;
+  let deudaId = null;
+  if (p.categoria === 'deudas' && data.deudas.length) deudaId = data.deudas[0].id;
+  const gasto = { id: crypto.randomUUID(), categoria: p.categoria, concepto: p.nombre, monto: p.monto, deudaId };
+  const q = getQ(currentQId);
+  q.gastos.push(gasto);
+  applyGastoEffect(gasto, 1);
+  saveData();
+  renderAll();
+}
+
+function eliminarPlantilla(id) {
+  data.plantillas = (data.plantillas || []).filter(p => p.id !== id);
+  saveData();
+  renderAll();
+}
+
+document.getElementById('btnNuevaPlantilla').addEventListener('click', () => {
+  const nombre = prompt('Nombre del gasto fijo (ej: Spotify, Gimnasio...)');
+  if (!nombre || !nombre.trim()) return;
+  const montoStr = prompt('Monto mensual (solo números):');
+  const monto = parseFloat(montoStr);
+  if (!monto || monto <= 0) { notify('Monto inválido, no se guardó la plantilla.'); return; }
+  const catStr = prompt('Categoría: escribe una de estas palabras\nbasicos / suscripciones / ocio / deudas', 'basicos');
+  const map = { basicos: 'gastosBasicos', suscripciones: 'suscripciones', ocio: 'ocio', deudas: 'deudas' };
+  const categoria = map[(catStr || '').trim().toLowerCase()] || 'gastosBasicos';
+  data.plantillas = data.plantillas || [];
+  data.plantillas.push({ id: crypto.randomUUID(), nombre: nombre.trim(), categoria, monto });
+  saveData();
+  renderAll();
+});
+
+function renderGastos() {
+  const q = getQ(currentQId);
+  const html = q.gastos.length ? q.gastos.map(g => {
+    const cat = CATEGORIAS.find(c => c.key === g.categoria);
+    const metodoBadge = g.categoria !== 'deudas'
+      ? (g.metodoPago === 'tarjeta' ? ' · 💳 con tarjeta' : ' · 💰 con ahorros')
+      : '';
+    return `
+    <div class="list-item">
+      <div class="li-main">
+        <span class="t1">${cat ? cat.icon : ''} ${escapeHtml(g.concepto)}</span>
+        <span class="t2">${cat ? cat.label : g.categoria}${metodoBadge}</span>
+      </div>
+      <div class="row">
+        <span class="amt" style="color:var(--red);">-${fmt(g.monto)}</span>
+        <button class="del-btn" onclick="deleteGasto('${g.id}')">✕</button>
+      </div>
+    </div>
+  `;
+  }).join('') : '<div class="empty">Aún no registras gastos en esta quincena.</div>';
+  document.getElementById('listaGastos').innerHTML = html;
+  updateGastoFormUI();
+}
+
+function deleteGasto(id) {
+  const q = getQ(currentQId);
+  const g = q.gastos.find(x => x.id === id);
+  if (g) applyGastoEffect(g, -1);
+  q.gastos = q.gastos.filter(x => x.id !== id);
+  saveData();
+  renderAll();
+}
+
+document.getElementById('btnAddGasto').addEventListener('click', () => {
+  const categoria = document.getElementById('gastoCategoria').value;
+  const concepto = document.getElementById('gastoConcepto').value.trim() || 'Gasto';
+  const monto = parseMonto(document.getElementById('gastoMonto').value);
+  if (!monto || monto <= 0) { notify('Ingresa un monto válido.'); return; }
+  let deudaId = null;
+  let metodoPago = 'ahorros';
+  if (categoria === 'deudas' && data.deudas.length) {
+    deudaId = document.getElementById('gastoDeuda').value || null;
+  } else {
+    metodoPago = document.getElementById('gastoMetodo').value || 'ahorros';
+    if (metodoPago === 'tarjeta') {
+      const sel = document.getElementById('gastoMetodoDeuda').value;
+      if (!sel || sel === '_new') {
+        const nueva = { id: crypto.randomUUID(), nombre: 'Tarjeta de crédito', tipo: 'tarjeta', total: 0, pendiente: 0, minimo: 0 };
+        data.deudas.push(nueva);
+        deudaId = nueva.id;
+      } else {
+        deudaId = sel;
+      }
+    }
+  }
+  const gasto = { id: crypto.randomUUID(), categoria, concepto, monto, deudaId, metodoPago };
+  const q = getQ(currentQId);
+  q.gastos.push(gasto);
+  applyGastoEffect(gasto, 1);
+  saveData();
+  document.getElementById('gastoConcepto').value = '';
+  document.getElementById('gastoMonto').value = '';
+  renderAll();
+});
+
+/* ===================== RENDER: DEUDAS ===================== */
+function renderDeudas() {
+  const totalPendiente = data.deudas.reduce((s, d) => s + (d.pendiente || 0), 0);
+  const totalMinimo = data.deudas.reduce((s, d) => s + (d.minimo || 0), 0);
+  document.getElementById('deudaTotalPendiente').textContent = fmt(totalPendiente);
+  document.getElementById('deudaPagoMin').textContent = fmt(totalMinimo);
+
+  // Las tarjetas sin ningún uso de cupo no se listan aquí (no tiene sentido
+  // mostrarlas como "deuda" hasta que realmente uses el cupo). Las que sí
+  // tienen saldo en uso se muestran igual que cualquier otra deuda, con su
+  // barra de "% pagado": el "total" de una tarjeta sube con cada compra y
+  // el "pendiente" baja con cada abono, así que el progreso se calcula
+  // exactamente igual. La edición de cupo/fechas sigue viviendo en 🪪 Tarjetas
+  // (por eso estas filas no tienen botón de eliminar: para borrar una
+  // tarjeta por completo, se hace desde allá).
+  const deudasListables = data.deudas.filter(d => {
+    const esTarjetaConCupo = d.tipo === 'tarjeta' && (d.cupoTotal || 0) > 0;
+    return !esTarjetaConCupo || (d.pendiente || 0) > 0;
+  });
+
+  const html = deudasListables.length ? deudasListables.map(d => {
+    const tipo = TIPOS_DEUDA[d.tipo] || TIPOS_DEUDA.otra;
+    const esTarjeta = d.tipo === 'tarjeta' && (d.cupoTotal || 0) > 0;
+    const pctPagado = d.total > 0 ? Math.min(100, ((d.total - d.pendiente) / d.total) * 100) : 0;
+    return `
+    <div class="cat-row">
+      <div class="row between">
+        <span>
+          <strong>${escapeHtml(d.nombre)}</strong>
+          <span class="chip ok" style="margin-left:6px;">${tipo.icon} ${tipo.label}</span>
+        </span>
+        ${esTarjeta ? '' : `<button class="del-btn" onclick="deleteDeuda('${d.id}')">✕</button>`}
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${pctPagado}%; background:var(--red);"></div></div>
+      <div class="sub row between">
+        <span>Pendiente: ${fmt(d.pendiente)} de ${fmt(d.total)}</span>
+        <span>${pctPagado.toFixed(0)}% pagado</span>
+      </div>
+    </div>
+    `;
+  }).join('') : '<div class="empty">No tienes deudas registradas. 🎉</div>';
+  document.getElementById('listaDeudas').innerHTML = html;
+  populateGastoDeudaSelect();
+}
+
+function deleteDeuda(id) {
+  data.deudas = data.deudas.filter(d => d.id !== id);
+  saveData();
+  renderAll();
+}
+
+document.getElementById('btnAddDeuda').addEventListener('click', () => {
+  const nombre = document.getElementById('deudaNombre').value.trim();
+  const tipo = document.getElementById('deudaTipo').value || 'otra';
+  const total = parseMonto(document.getElementById('deudaTotal').value) || 0;
+  const pendiente = parseMonto(document.getElementById('deudaPendiente').value) || 0;
+  const minimo = parseMonto(document.getElementById('deudaMinimo').value) || 0;
+  if (!nombre) { notify('Ponle un nombre a la deuda.'); return; }
+  data.deudas.push({ id: crypto.randomUUID(), nombre, tipo, total: total || pendiente, pendiente, minimo });
+  saveData();
+  document.getElementById('deudaNombre').value = '';
+  document.getElementById('deudaTipo').value = 'familiar';
+  document.getElementById('deudaTotal').value = '';
+  document.getElementById('deudaPendiente').value = '';
+  document.getElementById('deudaMinimo').value = '';
+  renderAll();
+});
+
+/* ===================== RENDER: TARJETAS (cupo, fechas, % de uso) ===================== */
+// Las tarjetas son, técnicamente, deudas con tipo "tarjeta" que además
+// guardan cupoTotal/fechaCorte/fechaPago. Así, esta pestaña y 💳 Deudas /
+// 🚦 Estado comparten exactamente los mismos datos, sin duplicar nada.
+function tarjetasConCupo() {
+  return data.deudas.filter(d => d.tipo === 'tarjeta' && (d.cupoTotal || 0) > 0);
+}
+
+function semaforoUtilizacion(pct) {
+  if (pct < 30) return { color: 'green', text: `Usas el ${pct.toFixed(0)}% de tu cupo. Nivel saludable.` };
+  if (pct < 70) return { color: 'orange', text: `Usas el ${pct.toFixed(0)}% de tu cupo. Vigílalo para que no siga subiendo.` };
+  return { color: 'red', text: `Usas el ${pct.toFixed(0)}% de tu cupo. Nivel crítico, prioriza bajarlo antes de la fecha de corte.` };
+}
+
+function renderTarjetas() {
+  const tarjetas = tarjetasConCupo();
+  const sinCupo = data.deudas.filter(d => d.tipo === 'tarjeta' && !((d.cupoTotal || 0) > 0));
+
+  const totalCupo = tarjetas.reduce((s, d) => s + (d.cupoTotal || 0), 0);
+  const totalUsado = tarjetas.reduce((s, d) => s + (d.pendiente || 0), 0);
+  const pctGeneral = totalCupo > 0 ? (totalUsado / totalCupo) * 100 : 0;
+  const resGeneral = tarjetas.length ? semaforoUtilizacion(pctGeneral) : { color: 'green', text: 'Agrega tus tarjetas para ver tu utilización de cupo.' };
+  const badgeText = { green: '🟢 Bien', orange: '🟡 Atención', red: '🔴 Crítico' };
+
+  document.getElementById('utilizacionGeneralCard').innerHTML = `
+    <div class="row" style="align-items:center;gap:14px;">
+      <div class="semaforo-dot-big ${resGeneral.color}"></div>
+      <div>
+        <h2 style="margin:0 0 4px;">Utilización de cupo general</h2>
+        <p style="margin:0;color:var(--text-muted);font-size:13.5px;">${tarjetas.length ? `${fmt(totalUsado)} de ${fmt(totalCupo)} · ${pctGeneral.toFixed(0)}% usado` : resGeneral.text}</p>
+      </div>
+    </div>
+    ${tarjetas.length ? `
+      <div class="progress-track" style="margin-top:14px;">
+        <div class="progress-fill" style="width:${Math.min(100, pctGeneral)}%; background:var(--${resGeneral.color});"></div>
+      </div>
+    ` : ''}
+  `;
+
+  const html = tarjetas.map(d => {
+    const disponible = Math.max(0, (d.cupoTotal || 0) - (d.pendiente || 0));
+    const pct = d.cupoTotal > 0 ? (d.pendiente / d.cupoTotal) * 100 : 0;
+    const res = semaforoUtilizacion(pct);
+    return `
+    <div class="cat-row" style="border:1px solid var(--border);border-radius:12px;padding:12px;">
+      <div class="row between" style="margin-bottom:6px;">
+        <strong>${escapeHtml(d.nombre)}</strong>
+        <div class="row" style="gap:6px;">
+          <span class="semaforo-badge ${res.color}">${badgeText[res.color]}</span>
+          <button class="del-btn" onclick="deleteDeuda('${d.id}')">✕</button>
+        </div>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${Math.min(100, pct)}%; background:var(--${res.color});"></div></div>
+      <div class="sub row between" style="margin-bottom:8px;">
+        <span>Usado: ${fmt(d.pendiente)} de ${fmt(d.cupoTotal)}</span>
+        <span>Disponible: ${fmt(disponible)} · ${pct.toFixed(0)}%</span>
+      </div>
+      <p class="sub" style="margin:0 0 8px;font-size:12px;color:var(--text-muted);">${res.text}</p>
+      <div class="row between" style="font-size:13px;color:var(--text-muted);">
+        <span>📅 Corte: día ${d.fechaCorte || '—'}</span>
+        <span>⏰ Límite de pago: día ${d.fechaPago || '—'}</span>
+      </div>
+    </div>
+    `;
+  }).join('');
+
+  const sinCupoHtml = sinCupo.length ? `
+    <p class="sub" style="margin:14px 0 6px;font-size:12px;color:var(--text-muted);">Sin cupo registrado todavía (agrégalo para ver su % de uso):</p>
+    ${sinCupo.map(d => `
+      <div class="list-item">
+        <div class="li-main"><span class="t1">${escapeHtml(d.nombre)}</span><span class="t2">Deuda: ${fmt(d.pendiente)}</span></div>
+        <button class="del-btn" onclick="deleteDeuda('${d.id}')">✕</button>
+      </div>
+    `).join('')}
+  ` : '';
+
+  document.getElementById('listaTarjetas').innerHTML = (html || '<div class="empty">Aún no tienes tarjetas registradas.</div>') + sinCupoHtml;
+}
+
+document.getElementById('btnAddTarjeta').addEventListener('click', () => {
+  const nombre = document.getElementById('tarjetaBanco').value.trim();
+  const cupoTotal = parseMonto(document.getElementById('tarjetaCupo').value) || 0;
+  const pendiente = parseMonto(document.getElementById('tarjetaUsado').value) || 0;
+  let fechaCorte = parseInt(document.getElementById('tarjetaCorte').value, 10) || null;
+  let fechaPago = parseInt(document.getElementById('tarjetaPago').value, 10) || null;
+  if (!nombre) { notify('Ponle un nombre o banco a la tarjeta.'); return; }
+  if (fechaCorte) fechaCorte = Math.min(31, Math.max(1, fechaCorte));
+  if (fechaPago) fechaPago = Math.min(31, Math.max(1, fechaPago));
+  data.deudas.push({
+    id: crypto.randomUUID(), nombre, tipo: 'tarjeta',
+    cupoTotal, total: pendiente, pendiente, minimo: 0,
+    fechaCorte, fechaPago,
+  });
+  saveData();
+  document.getElementById('tarjetaBanco').value = '';
+  document.getElementById('tarjetaCupo').value = '';
+  document.getElementById('tarjetaUsado').value = '';
+  document.getElementById('tarjetaCorte').value = '';
+  document.getElementById('tarjetaPago').value = '';
+  renderAll();
+});
+
+/* ===================== RENDER: FONDO ===================== */
+// El Fondo ya no tiene una meta ni un "Actual" editable a mano: es un
+// ahorro sin límite y su saldo es la suma de todos los movimientos
+// (aportes suman, retiros restan). Así queda un historial de cuándo y por
+// qué metiste mano al fondo, en vez de solo un número que cualquiera
+// puede pisar por error.
+function renderFondo() {
+  const movimientos = data.fondo.movimientos || [];
+  document.getElementById('fondoSaldo').textContent = fmt(data.fondo.actual || 0);
+
+  const totalAportes = movimientos.filter(m => m.tipo === 'aporte').reduce((s, m) => s + m.monto, 0);
+  const totalRetiros = movimientos.filter(m => m.tipo === 'retiro').reduce((s, m) => s + m.monto, 0);
+  document.getElementById('fondoTexto').textContent = totalRetiros > 0
+    ? `Has aportado ${fmt(totalAportes)} en total y retirado ${fmt(totalRetiros)} (${movimientos.filter(m=>m.tipo==='retiro').length} retiro${movimientos.filter(m=>m.tipo==='retiro').length===1?'':'s'}).`
+    : `Has aportado ${fmt(totalAportes)} en total. Sin retiros todavía. 🎉`;
+
+  const ordenados = [...movimientos].sort((a, b) => (b.fecha || 0) - (a.fecha || 0));
+  const html = ordenados.length ? ordenados.map(m => {
+    const esAporte = m.tipo === 'aporte';
+    const fechaTxt = m.fecha ? new Date(m.fecha).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }) : '';
+    return `
+    <div class="list-item">
+      <div class="li-main">
+        <span class="t1">${esAporte ? '💰 Aporte' : '🚨 Retiro'}${m.concepto ? ' — ' + escapeHtml(m.concepto) : ''}</span>
+        <span class="t2">${fechaTxt}</span>
+      </div>
+      <div class="row">
+        <span class="amt" style="color:${esAporte ? 'var(--green)' : 'var(--red)'};">${esAporte ? '+' : '-'}${fmt(m.monto)}</span>
+        <button class="del-btn" onclick="deleteMovFondo('${m.id}')">✕</button>
+      </div>
+    </div>
+    `;
+  }).join('') : '<div class="empty">Aún no registras movimientos del fondo.</div>';
+  document.getElementById('listaFondoMov').innerHTML = html;
+}
+
+function deleteMovFondo(id) {
+  const m = (data.fondo.movimientos || []).find(x => x.id === id);
+  if (m) {
+    // Revierte el efecto sobre el saldo antes de borrar el movimiento.
+    data.fondo.actual = Math.max(0, (data.fondo.actual || 0) + (m.tipo === 'aporte' ? -m.monto : m.monto));
+  }
+  data.fondo.movimientos = (data.fondo.movimientos || []).filter(x => x.id !== id);
+  saveData();
+  renderAll();
+}
+
+document.getElementById('btnRegistrarMovFondo').addEventListener('click', () => {
+  const tipo = document.getElementById('fondoMovTipo').value === 'retiro' ? 'retiro' : 'aporte';
+  const concepto = document.getElementById('fondoMovConcepto').value.trim();
+  const monto = parseMonto(document.getElementById('fondoMovMonto').value);
+  if (!monto || monto <= 0) { notify('Ingresa un monto válido.'); return; }
+  if (tipo === 'retiro' && monto > (data.fondo.actual || 0)) {
+    notify(`Ese retiro (${fmt(monto)}) es mayor a tu saldo actual (${fmt(data.fondo.actual || 0)}). Ajusta el monto.`);
+    return;
+  }
+  data.fondo.movimientos = data.fondo.movimientos || [];
+  data.fondo.movimientos.push({ id: crypto.randomUUID(), tipo, concepto, monto, fecha: Date.now() });
+  data.fondo.actual = Math.max(0, (data.fondo.actual || 0) + (tipo === 'aporte' ? monto : -monto));
+  saveData();
+  document.getElementById('fondoMovConcepto').value = '';
+  document.getElementById('fondoMovMonto').value = '';
+  notify(tipo === 'aporte' ? '✅ Aporte registrado.' : '🚨 Retiro registrado.');
+  renderAll();
+});
+
+/* ===================== RENDER: CONFIG (percentages) ===================== */
+function renderConfig() {
+  const wrap = document.getElementById('pctInputs');
+  wrap.innerHTML = CATEGORIAS.map(c => `
+    <div class="pct-input-row">
+      <span class="swatch" style="background:${c.color};"></span>
+      <span style="flex:1;">${c.icon} ${c.label}</span>
+      <input type="number" min="0" max="100" step="1" id="pct_${c.key}" value="${data.pct[c.key]}">
+      <span>%</span>
+    </div>
+  `).join('');
+  CATEGORIAS.forEach(c => {
+    document.getElementById('pct_' + c.key).addEventListener('input', updatePctBanner);
+  });
+  updatePctBanner();
+}
+function currentPctSum() {
+  return CATEGORIAS.reduce((s, c) => s + (parseFloat(document.getElementById('pct_' + c.key).value) || 0), 0);
+}
+function updatePctBanner() {
+  const sum = currentPctSum();
+  const banner = document.getElementById('pctSumBanner');
+  banner.textContent = `Suma actual: ${sum}%` + (sum === 100 ? ' ✅' : sum > 100 ? ' — te pasaste, resta ' + (sum-100) + '%' : ' — te faltan ' + (100-sum) + '%');
+  banner.style.background = sum === 100 ? 'var(--green-soft)' : 'var(--orange-soft)';
+  banner.style.color = sum === 100 ? 'var(--green)' : 'var(--orange)';
+}
+document.getElementById('btnGuardarPct').addEventListener('click', () => {
+  const sum = currentPctSum();
+  if (sum !== 100) { notify('Los porcentajes deben sumar 100% antes de guardar.'); return; }
+  CATEGORIAS.forEach(c => {
+    data.pct[c.key] = parseFloat(document.getElementById('pct_' + c.key).value) || 0;
+  });
+  saveData();
+  renderAll();
+  notify('Distribución guardada ✅');
+});
+document.getElementById('btnResetPct').addEventListener('click', () => {
+  data.pct = { ...DEFAULT_PCT };
+  saveData();
+  renderAll();
+});
+
+/* ===================== RENDER: HISTORIAL ===================== */
+function renderHistorial() {
+  const ids = Object.keys(data.quincenas).sort();
+  const tbody = document.querySelector('#tablaHistorial tbody');
+  tbody.innerHTML = ids.length ? ids.map(id => {
+    const ing = qTotalIngresos(id);
+    const gas = qTotalGastos(id);
+    return `<tr><td>${qLabel(id)}</td><td>${fmt(ing)}</td><td>${fmt(gas)}</td><td style="color:${ing-gas>=0?'var(--green)':'var(--red)'}">${fmt(ing-gas)}</td></tr>`;
+  }).reverse().join('') : `<tr><td colspan="4" class="empty">Sin datos aún.</td></tr>`;
+
+  renderHistorialChart(ids);
+}
+
+/* --- Evolución ingresos/gastos: SVG dibujado a mano, sin librerías --- */
+function renderHistorialChart(ids) {
+  const wrap = document.getElementById('chartHistorialWrap');
+  if (!ids.length) {
+    wrap.innerHTML = '<div class="empty">Aún no hay quincenas registradas.</div>';
+    return;
+  }
+  const ingresos = ids.map(qTotalIngresos);
+  const gastos = ids.map(qTotalGastos);
+  const maxVal = Math.max(1, ...ingresos, ...gastos);
+  const w = 600, h = 220, pad = 24;
+  const n = ids.length;
+
+  function pointsFor(arr) {
+    if (n === 1) {
+      const x = w / 2, y = h - pad - (arr[0] / maxVal) * (h - 2 * pad);
+      return [[x, y]];
+    }
+    return arr.map((v, i) => {
+      const x = pad + (i * (w - 2 * pad) / (n - 1));
+      const y = h - pad - (v / maxVal) * (h - 2 * pad);
+      return [x, y];
+    });
+  }
+
+  function lineFor(arr, color) {
+    const pts = pointsFor(arr);
+    if (pts.length === 1) {
+      return `<circle cx="${pts[0][0]}" cy="${pts[0][1]}" r="4" fill="${color}"/>`;
+    }
+    const line = pts.map(p => p.join(',')).join(' ');
+    const dots = pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3" fill="${color}"/>`).join('');
+    return `<polyline points="${line}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>${dots}`;
+  }
+
+  wrap.innerHTML = `
+    <svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">
+      <line x1="${pad}" y1="${h - pad}" x2="${w - pad}" y2="${h - pad}" stroke="#8888" stroke-width="1"/>
+      ${lineFor(gastos, '#dc2626')}
+      ${lineFor(ingresos, '#16a34a')}
+    </svg>
+  `;
+}
+
+/* ===================== ESTADO / SEMÁFORO ===================== */
+function ingresoMensualPromedio() {
+  const ids = Object.keys(data.quincenas);
+  let total = 0, count = 0;
+  ids.forEach(id => { const t = qTotalIngresos(id); if (t > 0) { total += t; count++; } });
+  if (count === 0) return qTotalIngresos(currentQId) * 2;
+  return (total / count) * 2;
+}
+
+function semaforoFondo(valor, gastosBasicosMensual) {
+  const meses = gastosBasicosMensual > 0 ? valor / gastosBasicosMensual : (valor > 0 ? 99 : 0);
+  if (meses >= 3) return { color: 'green', text: `Cubre ${meses.toFixed(1)} meses de gastos básicos. Colchón sólido.` };
+  if (meses >= 1) return { color: 'orange', text: `Cubre ${meses.toFixed(1)} meses de gastos básicos. Vas construyendo el colchón, la meta son 3-6 meses.` };
+  return { color: 'red', text: `Cubre menos de 1 mes de gastos básicos. Es tu prioridad número uno.` };
+}
+function semaforoCaja(valor, gastosBasicosMensual) {
+  if (valor < 0) return { color: 'red', text: 'Caja operativa negativa: estás gastando más de lo que tienes disponible.' };
+  const meses = gastosBasicosMensual > 0 ? valor / gastosBasicosMensual : (valor > 0 ? 99 : 0);
+  if (meses >= 1) return { color: 'green', text: `Tienes ${meses.toFixed(1)} meses de flujo operativo cubierto.` };
+  if (meses >= 0.5) return { color: 'orange', text: `Tienes ${meses.toFixed(1)} meses de flujo operativo. Ajustado pero manejable.` };
+  return { color: 'red', text: 'Muy poco colchón para cubrir gastos del día a día.' };
+}
+function semaforoDeuda(valor, ingresoMensual, tipo) {
+  if (valor <= 0) return { color: 'green', text: 'Sin deuda pendiente en esta categoría.' };
+  const ratio = ingresoMensual > 0 ? valor / ingresoMensual : 99;
+  const limiteAmarillo = tipo === 'tarjeta' ? 0.5 : 1;
+  const limiteRojo = tipo === 'tarjeta' ? 1 : 2;
+  if (ratio <= limiteAmarillo) return { color: 'green', text: `Equivale a ${ratio.toFixed(1)}x tu ingreso mensual. Manejable.` };
+  if (ratio <= limiteRojo) return { color: 'orange', text: `Equivale a ${ratio.toFixed(1)}x tu ingreso mensual. Foco de atención.` };
+  return { color: 'red', text: `Equivale a ${ratio.toFixed(1)}x tu ingreso mensual. Riesgo alto, prioriza pagarla.` };
+}
+function semaforoPorCobrar(valor, ingresoMensual) {
+  if (valor <= 0) return { color: 'green', text: 'No tienes dinero prestado a terceros en este momento.' };
+  const ratio = ingresoMensual > 0 ? valor / ingresoMensual : 99;
+  if (ratio <= 0.3) return { color: 'green', text: `Es ${ratio.toFixed(1)}x tu ingreso mensual, un monto bajo de riesgo.` };
+  if (ratio <= 0.8) return { color: 'orange', text: `Es ${ratio.toFixed(1)}x tu ingreso mensual. Vale la pena gestionar el cobro.` };
+  return { color: 'red', text: `Es ${ratio.toFixed(1)}x tu ingreso mensual. Tienes mucho capital fuera de tu control.` };
+}
+function semaforoMoto(valor, ingresoMensual) {
+  if (valor <= 0) {
+    return { color: 'green', text: 'Aún no financiada. Cuando actives el crédito (previsto 1 de noviembre), registra aquí el monto financiado para hacerle seguimiento.' };
+  }
+  return semaforoDeuda(valor, ingresoMensual, 'moto');
+}
+
+function updateEstadoValor(key, value) {
+  data.estado[key] = parseMonto(value) || 0;
+  saveData();
+  renderEstado();
+}
+
+function renderEstado() {
+  const ingresoMensual = ingresoMensualPromedio();
+  const gastosBasicosMensual = ingresoMensual * (data.pct.gastosBasicos || 0) / 100;
+
+  // Los campos marcados "auto" se calculan solos a partir de lo que ya
+  // registras en Fondo y Deudas — no hay que digitarlos dos veces.
+  const items = [
+    { key: 'fondoEmergencia', label: '🛟 Fondo de emergencia', auto: true,
+      getValue: () => data.fondo.actual || 0,
+      calc: v => semaforoFondo(v, gastosBasicosMensual),
+      note: 'Se toma automáticamente de la pestaña 🛟 Fondo.' },
+    { key: 'cajaOperativa', label: '💼 Caja operativa', auto: false,
+      calc: v => semaforoCaja(v, gastosBasicosMensual) },
+    { key: 'deudasFamiliares', label: '👪 Deudas familiares', auto: true,
+      getValue: () => sumaDeudasPorTipo('familiar'),
+      calc: v => semaforoDeuda(v, ingresoMensual, 'familiar'),
+      note: 'Suma automática de tus deudas con tipo "Familiar" en la pestaña 💳 Deudas.' },
+    { key: 'deudasTarjetas', label: '💳 Deudas tarjetas de crédito', auto: true,
+      getValue: () => sumaDeudasPorTipo('tarjeta'),
+      calc: v => semaforoDeuda(v, ingresoMensual, 'tarjeta'),
+      note: 'Suma automática de tus deudas con tipo "Tarjeta de crédito" en la pestaña 💳 Deudas.' },
+    { key: 'deudaMoto', label: '🏍️ Deuda moto (financiación desde 1 nov)', auto: true,
+      getValue: () => sumaDeudasPorTipo('moto'),
+      calc: v => semaforoMoto(v, ingresoMensual),
+      note: 'Se activa sola en cuanto agregues una deuda con tipo "Moto" en la pestaña 💳 Deudas.' },
+    { key: 'deudasOtras', label: '📌 Otras deudas', auto: true,
+      getValue: () => sumaDeudasPorTipo('otra'),
+      calc: v => semaforoDeuda(v, ingresoMensual, 'otra'),
+      note: 'Suma automática de tus deudas con tipo "Otra" en la pestaña 💳 Deudas.' },
+    { key: 'cuentasPorCobrar', label: '🤝 Cuentas por cobrar (amigos/familia)', auto: false,
+      calc: v => semaforoPorCobrar(v, ingresoMensual) },
+  ];
+
+  const badgeText = { green: '🟢 Bien', orange: '🟡 Atención', red: '🔴 Crítico' };
+  let html = '';
+  const colors = [];
+  items.forEach(it => {
+    const valor = it.auto ? it.getValue() : (data.estado[it.key] || 0);
+    const res = it.calc(valor);
+    colors.push(res.color);
+    const cuerpo = it.auto
+      ? `<strong style="font-size:16px;">${fmt(valor)}</strong>`
+      : `<input type="text" inputmode="decimal" value="${valor}" oninput="updateEstadoValor('${it.key}', this.value)" placeholder="0.00">`;
+    html += `
+      <div class="estado-item">
+        <div class="row between" style="margin-bottom:8px;">
+          <label style="margin:0;font-size:13.5px;color:var(--text);font-weight:600;">${it.label}</label>
+          <span class="semaforo-badge ${res.color}">${badgeText[res.color]}</span>
+        </div>
+        ${cuerpo}
+        <p class="sub" style="margin:6px 0 0;font-size:12.5px;color:var(--text-muted);">${res.text}</p>
+      </div>
+    `;
+  });
+  document.getElementById('estadoItems').innerHTML = html;
+
+  let overallColor = 'green', overallText = 'Tu salud financiera está en buen estado. ¡Sigue así!';
+  if (colors.includes('red')) { overallColor = 'red'; overallText = 'Hay puntos críticos que requieren atención inmediata.'; }
+  else if (colors.includes('orange')) { overallColor = 'orange'; overallText = 'Vas por buen camino, pero hay puntos para reforzar.'; }
+
+  document.getElementById('semaforoGeneralCard').innerHTML = `
+    <div class="row" style="align-items:center;gap:14px;">
+      <div class="semaforo-dot-big ${overallColor}"></div>
+      <div>
+        <h2 style="margin:0 0 4px;">Semáforo general</h2>
+        <p style="margin:0;color:var(--text-muted);font-size:13.5px;">${overallText}</p>
+      </div>
+    </div>
+  `;
+}
+
+/* ===================== UTIL ===================== */
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ===================== THEME ===================== */
+const themeBtn = document.getElementById('themeToggle');
+themeBtn.addEventListener('click', () => {
+  const root = document.documentElement;
+  const cur = root.getAttribute('data-theme');
+  if (cur === 'dark') root.setAttribute('data-theme', 'light');
+  else if (cur === 'light') root.removeAttribute('data-theme');
+  else root.setAttribute('data-theme', 'dark');
+  renderAll();
+});
+
+/* ===================== MASTER RENDER ===================== */
+function renderAll() {
+  renderQLabels();
+  populateGastoCategoriaSelect();
+  renderDashboard();
+  renderIngresos();
+  renderPlantillas();
+  renderGastos();
+  renderDeudas();
+  renderTarjetas();
+  renderFondo();
+  renderEstado();
+  renderConfig();
+  renderHistorial();
+}
+
+renderAll();
+renderSaveStatus();
+initCloudSync();
+
+/* ===================== GUARDAR / EXPORTAR / IMPORTAR ===================== */
+document.getElementById('btnGuardarAhora').addEventListener('click', async () => {
+  data.updatedAt = Date.now();
+  saveDataLocalOnly();
+  if (cloudDb) {
+    clearTimeout(cloudSaveTimer);
+    await flushCloudSave();
+  }
+  if (cloudDb && lastSyncInfo.state === 'synced') {
+    notify('✅ Guardado y sincronizado en la nube.');
+  } else if (cloudDb) {
+    notify('✅ Guardado en este dispositivo. No se pudo confirmar la sincronización en la nube justo ahora, pero lo reintentará solo.');
+  } else {
+    notify('✅ Guardado en este dispositivo. La sincronización en la nube no está disponible en esta vista — usa "Exportar copia" (pestaña Historial) de vez en cuando como respaldo extra.');
+  }
+  renderSaveStatus();
+});
+
+document.getElementById('btnExportar').addEventListener('click', async () => {
+  const fecha = new Date().toISOString().slice(0, 10);
+  const filename = `mis-finanzas-copia-${fecha}.json`;
+  const content = JSON.stringify(data, null, 2);
+  try {
+    if (window.claude && typeof window.claude.use === 'function') {
+      const downloads = await window.claude.use('downloads');
+      if (downloads) {
+        await downloads.save({ filename, data: content });
+        return;
+      }
+    }
+    notify('La descarga de archivos no está disponible en esta vista. Abre la app en una pestaña del navegador (fuera de una vista incrustada) e inténtalo de nuevo.');
+  } catch (e) {
+    if (e && e.code === 'declined') return;
+    console.error('Error exportando copia', e);
+    notify('No se pudo exportar la copia ahora mismo. Intenta de nuevo en unos segundos.');
+  }
+});
+document.getElementById('btnImportar').addEventListener('click', () => {
+  document.getElementById('inputImportar').click();
+});
+document.getElementById('inputImportar').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(reader.result);
+      if (!confirm('Esto reemplazará todos tus datos actuales con los del archivo. ¿Continuar?')) return;
+      data = normalizeData(parsed);
+      saveData();
+      renderAll();
+      notify('✅ Copia restaurada.');
+    } catch (err) {
+      notify('No se pudo leer el archivo. Asegúrate de que sea una copia exportada desde esta app.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+});
+
+/* ===================== SIEMPRE ONLINE: sin service worker ni caché ===================== */
+// La app funciona siempre conectada y tus datos viven en tu nube de Claude
+// (además de una copia local de respaldo), así que no hace falta ninguna
+// versión offline. Si tu navegador llegó a instalar un service worker de
+// una versión anterior de esta app, lo desactivamos aquí para que dejes de
+// ver copias viejas guardadas en caché.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations()
+    .then(regs => regs.forEach(reg => reg.unregister()))
+    .catch(() => {});
+}
+if ('caches' in window) {
+  caches.keys().then(keys => keys.forEach(k => caches.delete(k))).catch(() => {});
+}
+</script>
+</body>
+</html>
